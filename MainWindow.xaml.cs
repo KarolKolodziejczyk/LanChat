@@ -2,37 +2,34 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Net;
 using System.Net.Sockets;
-using System;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Windows;
 using System.Net.NetworkInformation;
+using System.Diagnostics;
 
 namespace LANCHAT2
 {
+    public enum Tryb
+    {
+        Rozgloszeniowy,
+        Adresowy,
+        Petlowy
+    }
     public partial class MainWindow : Window
     {
         private const int Port = 7799;
         private UdpClient udpClient;
         private IPEndPoint localEndPoint;
         string last_message;
+        private Tryb tryb = Tryb.Rozgloszeniowy;
+
         public MainWindow()
         {
-            InitializeComponent();
+            Trace.WriteLine("Start");
 
+            InitializeComponent();
+            textBoxIpAddress.IsEnabled = false;
             udpClient = new UdpClient();
             localEndPoint = new IPEndPoint(IPAddress.Any, Port);
          
@@ -72,23 +69,62 @@ namespace LANCHAT2
         {
             try
             {
-                IPAddress localAdress = NetworkUtils.GetLocalIPAddress();
-                IPAddress ipAddress = NetworkUtils.GetBroadcastAddress(localAdress, NetworkUtils.GetSubnetMask(localAdress));
-                  
-
-                var a = NetworkUtils.GetAllLocalIPAddresses();
-
-                foreach (var ip in a)
+                if (tryb == Tryb.Rozgloszeniowy)
                 {
-                    IPAddress ipA = NetworkUtils.GetBroadcastAddress(ip, NetworkUtils.GetSubnetMask(ip));
+                    IPAddress localAdress = NetworkUtils.GetLocalIPAddress();
+                    IPAddress ipAddress = NetworkUtils.GetBroadcastAddress(localAdress, NetworkUtils.GetSubnetMask(localAdress));
+
+
+                    var a = NetworkUtils.GetAllLocalIPAddresses();
+
+                    foreach (var ip in a)
+                    {
+                        IPAddress ipA = NetworkUtils.GetBroadcastAddress(ip, NetworkUtils.GetSubnetMask(ip));
+                        char sekretny_znak = (char)13;
+                        byte[] messageBytes = Encoding.UTF8.GetBytes(ip.ToString() + sekretny_znak);
+                        byte[] messageBytes2 = Encoding.UTF8.GetBytes(message);
+                        byte[] combinedBytes = messageBytes.Concat(messageBytes2).ToArray();
+                        udpClient.Send(combinedBytes, combinedBytes.Length, new IPEndPoint(ipA, Port));
+                    }
+                }
+
+                else if (tryb == Tryb.Adresowy)
+                {
+                    IPAddress ipaddress = IPAddress.Parse(textBoxIpAddress.Text);
+                    textBoxReceivedMessages.AppendText($"Wysłano: {message}\n");
                     char sekretny_znak = (char)13;
-                    byte[] messageBytes = Encoding.UTF8.GetBytes(ip.ToString() + sekretny_znak );
+
+                    byte[] messageBytes = Encoding.UTF8.GetBytes(ipaddress.ToString() + sekretny_znak);
                     byte[] messageBytes2 = Encoding.UTF8.GetBytes(message);
                     byte[] combinedBytes = messageBytes.Concat(messageBytes2).ToArray();
-                    udpClient.Send(combinedBytes, combinedBytes.Length, new IPEndPoint(ipA, Port));
+                    udpClient.Send(combinedBytes, combinedBytes.Length, new IPEndPoint(ipaddress, Port));
                 }
-                
-                //textBoxReceivedMessages.AppendText($"Wysłano: {message}\n");
+                else if (tryb == Tryb.Petlowy)
+                {
+                    IPAddress localAdress = NetworkUtils.GetLocalIPAddress();
+                    IPAddress ipAddress = NetworkUtils.GetBroadcastAddress(localAdress, NetworkUtils.GetSubnetMask(localAdress));
+
+
+                    var a = NetworkUtils.GetAllIPAddressesInNetwork(localAdress, NetworkUtils.GetSubnetMask(ip));
+
+                    foreach (var ip in a)
+                    {
+                        Trace.WriteLine($"{ip} PIERWSZA PETLA");
+
+                        var ipA = NetworkUtils.GetAllIPAddressesInNetwork(ip, NetworkUtils.GetSubnetMask(ip));
+                        foreach(var element in ipA)
+                        {
+                            Trace.WriteLine($"{element} DRUGA PETLA");
+
+                            char sekretny_znak = (char)13;
+                            byte[] messageBytes = Encoding.UTF8.GetBytes(ip.ToString() + sekretny_znak);
+                            byte[] messageBytes2 = Encoding.UTF8.GetBytes(message);
+                            byte[] combinedBytes = messageBytes.Concat(messageBytes2).ToArray();
+                            udpClient.Send(combinedBytes, combinedBytes.Length, new IPEndPoint(element, Port));
+                        }
+                    }
+                }
+
             }
             catch (Exception ex)
             {
@@ -99,10 +135,35 @@ namespace LANCHAT2
         private void buttonSend_Click(object sender, RoutedEventArgs e)
         {
             string message = textBoxMessage.Text;
-            string ipAddress = textBoxIpAddress.Text;
-            SendMessage(message, ipAddress);
+            if (message != "")
+                SendMessage(message, "T");
+            else
+                MessageBox.Show("Wiadomość nie może być pusta");
         }
+        private void btnTryb_Click(object sender, RoutedEventArgs e)
+        {
+            if (tryb == Tryb.Rozgloszeniowy)
+            {
+                textBoxIpAddress.IsEnabled = true;
+                tryb = Tryb.Adresowy;
+                btnTryb.Content = "Tryb Adresowy";
+            }
+            else if (tryb == Tryb.Adresowy)
+            {
+                textBoxIpAddress.IsEnabled = false;
+                tryb = Tryb.Petlowy;
+                btnTryb.Content = "Tryb Pętlowy";
+            }
+            else if (tryb == Tryb.Petlowy)
+            {
+                textBoxIpAddress.IsEnabled = false;
+                tryb = Tryb.Rozgloszeniowy;
+                btnTryb.Content = "Tryb Rozgłoszeniowy";
+            }
+        }
+
     }
+
 }
 
 //Pomocowa Klasa zajmująca się podstawymi zagadnieniami Networkowymi
@@ -157,6 +218,7 @@ public static class NetworkUtils
 
         return new IPAddress(broadcastBytes);
     }
+
     public static List<IPAddress> GetAllLocalIPAddresses()
     {
         List<IPAddress> ipAddresses = new List<IPAddress>();
@@ -179,4 +241,38 @@ public static class NetworkUtils
 
         return ipAddresses;
     }
+    public static List<IPAddress> GetAllIPAddressesInNetwork(IPAddress ipAddress, IPAddress subnetMask)
+    {
+        List<IPAddress> ipAddressesInNetwork = new List<IPAddress>();
+
+        byte[] ipBytes = ipAddress.GetAddressBytes();
+        byte[] maskBytes = subnetMask.GetAddressBytes();
+
+        if (ipBytes.Length != maskBytes.Length)
+        {
+            throw new ArgumentException("IP address and subnet mask do not have the same length.");
+        }
+
+        byte[] networkBytes = new byte[ipBytes.Length];
+        for (int i = 0; i < ipBytes.Length; i++)
+        {
+            networkBytes[i] = (byte)(ipBytes[i] & maskBytes[i]);
+        }
+
+        IPAddress networkAddress = new IPAddress(networkBytes);
+        IPAddress broadcastAddress = GetBroadcastAddress(networkAddress, subnetMask);
+
+        uint startIP = BitConverter.ToUInt32(networkAddress.GetAddressBytes(), 0);
+        uint endIP = BitConverter.ToUInt32(broadcastAddress.GetAddressBytes(), 0);
+
+        for (uint currentIP = startIP; currentIP <= endIP; currentIP++)
+        {
+            byte[] bytes = BitConverter.GetBytes(currentIP);
+            Array.Reverse(bytes);
+            ipAddressesInNetwork.Add(new IPAddress(bytes));
+        }
+
+        return ipAddressesInNetwork;
+    }
+
 }

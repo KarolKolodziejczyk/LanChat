@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "vJ9X8uUK1rDhjtvySITNacqSEYZAc4FNK4bwzVzm06CqBvBC9W+qdZdoyU1npOxAvJVMpHW1eVrEaquFoDd7Jg==",
+  "success": true,
+  "projectFilePath": "G:\\VISUALSTUDIO-REPO\\LANCHAT2\\LANCHAT2.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Karol\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x86\\6.0.7\\microsoft.netcore.app.runtime.win-x86.6.0.7.nupkg.sha512",
+    "C:\\Users\\Karol\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x86\\6.0.7\\microsoft.windowsdesktop.app.runtime.win-x86.6.0.7.nupkg.sha512",
+    "C:\\Users\\Karol\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x86\\6.0.7\\microsoft.aspnetcore.app.runtime.win-x86.6.0.7.nupkg.sha512",
+    "C:\\Users\\Karol\\.nuget\\packages\\microsoft.netcore.app.crossgen2.win-x64\\6.0.7\\microsoft.netcore.app.crossgen2.win-x64.6.0.7.nupkg.sha512"
+  ],
+  "logs": []
+}

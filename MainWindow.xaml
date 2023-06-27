@@ -1,7 +1,7 @@
 ﻿<Window x:Class="LANCHAT2.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="LAN Chat" Height="450" Width="800">
+        Title="LAN Chat" Height="450" Width="893">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -14,6 +14,8 @@
             <TextBox x:Name="textBoxMessage" Width="400"/>
             <TextBox x:Name="textBoxIpAddress" Width="200" Margin="10"/>
             <Button x:Name="buttonSend" Content="Send" Width="80" Click="buttonSend_Click"/>
+            <Button x:Name="btnTryb" Content="Tryb Rozgłoszeniowy" Width="139" Click="btnTryb_Click"/>
         </StackPanel>
     </Grid>
 </Window>
+

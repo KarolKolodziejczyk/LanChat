@@ -1,0 +1,5 @@
+G:\VISUALSTUDIO-REPO\LANCHAT2\obj\Release\net6.0\win-x64\LANCHAT2.csproj.AssemblyReference.cache
+G:\VISUALSTUDIO-REPO\LANCHAT2\obj\Release\net6.0\win-x64\LANCHAT2.GeneratedMSBuildEditorConfig.editorconfig
+G:\VISUALSTUDIO-REPO\LANCHAT2\obj\Release\net6.0\win-x64\LANCHAT2.AssemblyInfoInputs.cache
+G:\VISUALSTUDIO-REPO\LANCHAT2\obj\Release\net6.0\win-x64\LANCHAT2.AssemblyInfo.cs
+G:\VISUALSTUDIO-REPO\LANCHAT2\obj\Release\net6.0\win-x64\LANCHAT2.csproj.CoreCompileInputs.cache

@@ -1,0 +1,5 @@
+G:\VISUALSTUDIO-REPO\LANCHAT2\bin\Release\net6.0-windows\publish\LANCHAT2.exe
+G:\VISUALSTUDIO-REPO\LANCHAT2\bin\Release\net6.0-windows\publish\LANCHAT2.dll
+G:\VISUALSTUDIO-REPO\LANCHAT2\bin\Release\net6.0-windows\publish\LANCHAT2.deps.json
+G:\VISUALSTUDIO-REPO\LANCHAT2\bin\Release\net6.0-windows\publish\LANCHAT2.runtimeconfig.json
+G:\VISUALSTUDIO-REPO\LANCHAT2\bin\Release\net6.0-windows\publish\LANCHAT2.pdb
