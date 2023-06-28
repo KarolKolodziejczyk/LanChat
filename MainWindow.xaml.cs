@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Net.NetworkInformation;
 using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace LANCHAT2
 {
@@ -26,7 +27,6 @@ namespace LANCHAT2
 
         public MainWindow()
         {
-            Trace.WriteLine("Start");
 
             InitializeComponent();
             textBoxIpAddress.IsEnabled = false;
@@ -48,6 +48,7 @@ namespace LANCHAT2
                 {
                     UdpReceiveResult result = await udpClient.ReceiveAsync();
                     string receivedMessage = Encoding.UTF8.GetString(result.Buffer);
+                   //receivedMessage = EncryptionHelper.Decrypt(receivedMessage);
                     string[] t= Encoding.UTF8.GetString(result.Buffer).Split((char)13, StringSplitOptions.RemoveEmptyEntries); 
                     if (last_message != t[1])
                     {
@@ -84,6 +85,8 @@ namespace LANCHAT2
                         byte[] messageBytes = Encoding.UTF8.GetBytes(ip.ToString() + sekretny_znak);
                         byte[] messageBytes2 = Encoding.UTF8.GetBytes(message);
                         byte[] combinedBytes = messageBytes.Concat(messageBytes2).ToArray();
+               
+
                         udpClient.Send(combinedBytes, combinedBytes.Length, new IPEndPoint(ipA, Port));
                     }
                 }
@@ -97,33 +100,32 @@ namespace LANCHAT2
                     byte[] messageBytes = Encoding.UTF8.GetBytes(ipaddress.ToString() + sekretny_znak);
                     byte[] messageBytes2 = Encoding.UTF8.GetBytes(message);
                     byte[] combinedBytes = messageBytes.Concat(messageBytes2).ToArray();
+
+
                     udpClient.Send(combinedBytes, combinedBytes.Length, new IPEndPoint(ipaddress, Port));
                 }
-                else if (tryb == Tryb.Petlowy)
+               /* else if (tryb == Tryb.Petlowy)
                 {
                     IPAddress localAdress = NetworkUtils.GetLocalIPAddress();
-                    IPAddress ipAddress = NetworkUtils.GetBroadcastAddress(localAdress, NetworkUtils.GetSubnetMask(localAdress));
 
 
-                    var a = NetworkUtils.GetAllIPAddressesInNetwork(localAdress, NetworkUtils.GetSubnetMask(ip));
+                    var a = NetworkUtils.GetAllIPAddressesInNetwork(localAdress, NetworkUtils.GetSubnetMask(localAdress));
 
                     foreach (var ip in a)
                     {
                         Trace.WriteLine($"{ip} PIERWSZA PETLA");
 
-                        var ipA = NetworkUtils.GetAllIPAddressesInNetwork(ip, NetworkUtils.GetSubnetMask(ip));
-                        foreach(var element in ipA)
-                        {
-                            Trace.WriteLine($"{element} DRUGA PETLA");
+                       
+                            Trace.WriteLine($"{ip} DRUGA PETLA");
 
                             char sekretny_znak = (char)13;
                             byte[] messageBytes = Encoding.UTF8.GetBytes(ip.ToString() + sekretny_znak);
                             byte[] messageBytes2 = Encoding.UTF8.GetBytes(message);
                             byte[] combinedBytes = messageBytes.Concat(messageBytes2).ToArray();
-                            udpClient.Send(combinedBytes, combinedBytes.Length, new IPEndPoint(element, Port));
-                        }
+                            udpClient.Send(combinedBytes, combinedBytes.Length, new IPEndPoint(ip, Port));
+                        
                     }
-                }
+                }*/
 
             }
             catch (Exception ex)
@@ -148,24 +150,66 @@ namespace LANCHAT2
                 tryb = Tryb.Adresowy;
                 btnTryb.Content = "Tryb Adresowy";
             }
-            else if (tryb == Tryb.Adresowy)
+            /*else if (tryb == Tryb.Adresowy)
             {
                 textBoxIpAddress.IsEnabled = false;
                 tryb = Tryb.Petlowy;
                 btnTryb.Content = "Tryb Pętlowy";
-            }
-            else if (tryb == Tryb.Petlowy)
+            } */
+            else if (tryb == Tryb.Adresowy)
             {
                 textBoxIpAddress.IsEnabled = false;
                 tryb = Tryb.Rozgloszeniowy;
                 btnTryb.Content = "Tryb Rozgłoszeniowy";
             }
         }
-
     }
 
 }
 
+public class EncryptionHelper
+{
+    private static readonly byte[] Key = Encoding.UTF8.GetBytes("KluczSzyfrowania"); // Klucz szyfrowania (16, 24 lub 32 bajty)
+    private static readonly byte[] IV = Encoding.UTF8.GetBytes("WektorInicjalizacji"); // Wektor inicjalizacji (16 bajtów)
+
+    public static string Encrypt(string input)
+    {
+        using (Aes aes = Aes.Create())
+        {
+            aes.Key = Key;
+            aes.IV = IV;
+
+            ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+
+            byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+            byte[] encryptedBytes = encryptor.TransformFinalBlock(inputBytes, 0, inputBytes.Length);
+
+            encryptor.Dispose();
+
+            string encryptedString = Convert.ToBase64String(encryptedBytes);
+            return encryptedString;
+        }
+    }
+
+    public static string Decrypt(string encryptedInput)
+    {
+        using (Aes aes = Aes.Create())
+        {
+            aes.Key = Key;
+            aes.IV = IV;
+
+            ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+
+            byte[] encryptedBytes = Convert.FromBase64String(encryptedInput);
+            byte[] decryptedBytes = decryptor.TransformFinalBlock(encryptedBytes, 0, encryptedBytes.Length);
+
+            decryptor.Dispose();
+
+            string decryptedString = Encoding.UTF8.GetString(decryptedBytes);
+            return decryptedString;
+        }
+    }
+}
 //Pomocowa Klasa zajmująca się podstawymi zagadnieniami Networkowymi
 public static class NetworkUtils
 {

@@ -13,7 +13,7 @@
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="10">
             <TextBox x:Name="textBoxMessage" Width="400"/>
             <TextBox x:Name="textBoxIpAddress" Width="200" Margin="10"/>
-            <Button x:Name="buttonSend" Content="Send" Width="80" Click="buttonSend_Click"/>
+            <Button x:Name="buttonSend" Content="Wyślij" Width="80" Click="buttonSend_Click"/>
             <Button x:Name="btnTryb" Content="Tryb Rozgłoszeniowy" Width="139" Click="btnTryb_Click"/>
         </StackPanel>
     </Grid>
